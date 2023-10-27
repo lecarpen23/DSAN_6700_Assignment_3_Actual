@@ -21,21 +21,6 @@ author:
         city: Washington
         state: DC
 
-  - name: Nakul R. Padalkar
-    affiliations:
-      - id: gu
-        name: Georgetown University
-        city: Washington
-        state: DC
-  - name: Michael Varnerin
-    affiliations:
-      - ref: gu
-  - name: Minsuh Lim
-    affiliations:
-      - ref: gu
-  - name: Jingda Yang
-    affiliations:
-      - ref: gu
 
 jupyter: python3
 ---
