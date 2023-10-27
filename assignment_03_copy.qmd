@@ -1,16 +1,21 @@
 ---
-title: "Assignment 03"
-subtitle: "Hyperparameter Tunning - Group Number Here"
-date: 09/29/2023
+title: Assignment 03
+subtitle: Hyperparameter Tunning - Group 4
+date: 10/25/2023
 date-modified: last-modified
 date-format: long
 format:
   html:
-    theme: [cosmo, theme.scss]
+    theme:
+      - cosmo
+      - theme.scss
     toc: true
     embed-resources: true
     number-sections: true
+
 author:
+  - name: Landon Carpenter
+
   - name: Nakul R. Padalkar
     affiliations:
       - id: gu
@@ -26,8 +31,9 @@ author:
   - name: Jingda Yang
     affiliations:
       - ref: gu
----
 
+jupyter: python3
+---
 
 # Instructions (Remove the instructions before submission)
 
@@ -76,30 +82,53 @@ This section is graded based on the Github submission. Each person needs to have
 
 # Data Preparation (7 Points):
 
-```{python}
-# Add data preparation code here
-
-```
-
 ## Load the dataset and display the dataframe (2 Points).
 
 ```{python}
-# Add code here
+import pandas as pd 
 
+df_shopping = pd.read_csv("online_shoppers_intention.csv")
+
+print(df_shopping.head())
 ```
 
 ## Use `describe` to provide statistics on the pandas Dataframe (2 Points).
 
 ```{python}
-# Add code here
+df_shopping.describe()
 
+```
+
+```{python}
+df_shopping["Revenue"].value_counts()
 ```
 
 ## Split the dataset into a Training set and a Test set. Justify your preferred split (3 Points).
 
 ```{python}
-# Add code here
+from sklearn.model_selection import train_test_split
 
+# "Revenue" is the target variable 
+
+X = df_shopping.drop("Revenue", axis =1)
+y = df_shopping["Revenue"]
+
+# Split the dataset into 80% training and 20% test
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20, random_state=42)
+```
+
+```{python}
+# categorical variables for one-hot encoding
+X_train = pd.get_dummies(X_train)
+X_test = pd.get_dummies(X_test)
+
+
+X_train.head()
+```
+
+```{python}
+# Ensure that train and test set have the same columns after encoding
+X_train, X_test = X_train.align(X_test, axis=1, fill_value=0)
 ```
 
 # Classification Routine (12 Points):
@@ -109,43 +138,216 @@ Execute a classification routine using RandomForestClassifier(), BaggingClassifi
 ## RandomForestClassifier():
 
 ```{python}
-# Add code here
+import random
+from seaborn.palettes import color_palette
+random.seed(1276)
+import matplotlib.pyplot as plt
+import seaborn as sns
+import numpy as np
+from sklearn.model_selection import cross_val_score, RepeatedKFold
+from sklearn.ensemble import  RandomForestRegressor, BaggingRegressor
+from sklearn.linear_model import LogisticRegression
+from xgboost import XGBRegressor
+```
 
+```{python}
+from sklearn.ensemble import RandomForestClassifier, BaggingClassifier
+from xgboost import XGBClassifier
+from sklearn.metrics import accuracy_score
+from sklearn.model_selection import cross_val_score, RepeatedKFold
+import seaborn as sns
+import matplotlib.pyplot as plt
+```
+
+```{python}
+k = 10
+```
+
+## RandomForestClassifier()
+
+```{python}
+# Add code here
+rfc = RandomForestClassifier(n_estimators=100, max_depth=3, random_state=1276)
+rfc_acc = cross_val_score(rfc, X_train, y_train, cv=k, scoring='accuracy')
 ```
 
 ## BaggingClassifier():
 
 ```{python}
-# Add code here
-
+bc = BaggingClassifier(n_estimators=100, max_samples=100, random_state=1276)
+bc_acc = cross_val_score(bc, X_train, y_train, cv=k, scoring='accuracy')
 ```
 
 ## XGboostclassifier():
 
 ```{python}
 # Add code here
+xgb = XGBClassifier(n_estimators=100, max_depth=3, random_state=1276)
+xgb_acc = cross_val_score(xgb, X_train, y_train, cv=k, scoring='accuracy')
+```
 
+## Visualizations
+
+```{python}
+my_acc = [rfc_acc, bc_acc, xgb_acc]
+my_labels = ['Random Forest', 'Bagging', 'XGBoost']
+
+fig, ax = plt.subplots(figsize=(10, 6))
+sns.boxplot(data=my_acc, palette='Set3')
+ax.set_xticklabels(my_labels, rotation=60)
+ax.set_title('Model Accuracy Comparison')
+ax.set_ylabel('Accuracy')
+plt.show()
 ```
 
 # Classification with GridSearchCV (8 Points):
 
 Replicate the classification from Q2 using GridsearchCV().
-```{python}
-# Add code here
 
+```{python}
+from sklearn.model_selection import GridSearchCV
 ```
 
+```{python}
+# Add code here
+params = {'n_estimators': [100, 200, 300],
+            'max_depth': [3, 5, 7],
+            'random_state': [1276]
+            }
 
+rfc_grid = GridSearchCV(rfc, params, cv=k, scoring='accuracy', n_jobs=-1)
+rfc_grid.fit(X_train, y_train)
+```
+
+```{python}
+#show the best hyperparameters for rfc
+print(f"Best parameters for Random Forest: {rfc_grid.best_params_}")
+```
+
+```{python}
+params = {'n_estimators': [100, 200, 300],
+            'max_samples': [100, 200, 300],
+            'random_state': [1276]
+            }
+bc_grid = GridSearchCV(bc, params, cv=k, scoring='accuracy', n_jobs=-1)
+
+bc_grid.fit(X_train, y_train)
+```
+
+```{python}
+print(f"Best parameters for Bagging: {bc_grid.best_params_}")
+```
+
+```{python}
+params = {'n_estimators': [100, 200, 300],
+            'max_depth': [3, 5, 7],
+            'random_state': [1276]
+            }
+xgb_grid = GridSearchCV(xgb, params, cv=k, scoring='accuracy', n_jobs=-1)
+xgb_grid.fit(X_train, y_train)
+```
+
+```{python}
+print(f"Best parameters for XGBoost: {xgb_grid.best_params_}")
+```
+
+```{python}
+rfc_results = rfc_grid.cv_results_['mean_test_score']
+bc_results = bc_grid.cv_results_['mean_test_score']
+xgb_results = xgb_grid.cv_results_['mean_test_score']
+
+all = [rfc_results, bc_results, xgb_results]
+
+fig, ax = plt.subplots(figsize=(10, 6))
+sns.boxplot(data=all, palette='Set3')
+ax.set_xticklabels(my_labels, rotation=60)
+ax.set_title('Model Accuracy Comparison - Grid Search')
+ax.set_ylabel('Accuracy')
+plt.show()
+```
+
+## Boxplot to visualize each models GridSearchCV() 
 
 # Classification with RandomSearchCV (8 Points):
 
 Replicate the classification from Q2 using RandomSearchCV().
 
 ```{python}
-# Add code here
+from sklearn.model_selection import RandomizedSearchCV
+```
 
+```{python}
+# Add code here
+params = {'n_estimators': [100, 200, 300],
+            'max_depth': [3, 5, 7],
+            'random_state': [1276]
+            }
+
+rfc_random = RandomizedSearchCV(rfc, params, cv=k, scoring='accuracy', n_jobs=-1)
+rfc_random.fit(X_train, y_train)
+
+print(f"Best parameters for Random Forest: {rfc_random.best_params_}")
+```
+
+```{python}
+params = {'n_estimators': [100, 200, 300],
+            'max_samples': [100, 200, 300],
+            'random_state': [1276]
+            }
+
+bc_random = RandomizedSearchCV(bc, params, cv=k, scoring='accuracy', n_jobs=-1)
+bc_random.fit(X_train, y_train)
+
+print(f"Best parameters for Bagging: {bc_random.best_params_}")
+```
+
+```{python}
+params = {'n_estimators': [100, 200, 300],
+            'max_depth': [3, 5, 7],
+            'random_state': [1276]
+            }
+
+xgb_random = RandomizedSearchCV(xgb, params, cv=k, scoring='accuracy', n_jobs=-1)
+xgb_random.fit(X_train, y_train)
+
+print(f"Best parameters for XGBoost: {xgb_random.best_params_}")
+```
+
+```{python}
+rfc_rscores = rfc_random.cv_results_['mean_test_score']
+bc_rscores = bc_random.cv_results_['mean_test_score']
+xgb_rscores = xgb_random.cv_results_['mean_test_score']
+
+all = [rfc_rscores, bc_rscores, xgb_rscores]
+
+fig, ax = plt.subplots(figsize=(10, 6))
+sns.boxplot(data=all, palette='Set3')
+ax.set_xticklabels(my_labels, rotation=60)
+ax.set_title('Model Accuracy Comparison - Random Search')
+ax.set_ylabel('Accuracy')
+plt.show()
 ```
 
 # Comparison and Analysis (5 Points):
 
 Compare the results from Q2, Q3, and Q4. Describe the best hyperparameters for all three experiments.
+
+When comparing my results from Q2, Q3, and Q4 I imediately noticed that the box plot for Q2 without Grid Search or Random Search had the worst performance. Additionally comparing the box plots for Q3 and Q4, I got the same paramates as the best parameters and the box plots look very similar. In the future, when I'm not too worried about my computer crashing I should probably include more parameter in GridSearchCV() and RandomSearchCV() to get a better idea of the best parameters and to learn about the performance of GridSearchCV() vs RandomSearchCV().
+
+### Best Hyperparameters for Q3:
+
+```{python}
+print(f"Best parameters for Random Forest: {rfc_grid.best_params_}")
+print(f"Best parameters for Bagging: {bc_grid.best_params_}")
+print(f"Best parameters for XGBoost: {xgb_grid.best_params_}")
+```
+
+
+### Best Hyperparameters for Q4:
+
+```{python}
+print(f"Best parameters for Random Forest: {rfc_random.best_params_}")
+print(f"Best parameters for Bagging: {bc_random.best_params_}")
+print(f"Best parameters for XGBoost: {xgb_random.best_params_}")
+```
+
