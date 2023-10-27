@@ -15,6 +15,11 @@ format:
 
 author:
   - name: Landon Carpenter
+    affiliations:
+      - id: gu
+        name: Georgetown University
+        city: Washington
+        state: DC
 
   - name: Nakul R. Padalkar
     affiliations:
@@ -35,22 +40,7 @@ author:
 jupyter: python3
 ---
 
-# Instructions (Remove the instructions before submission)
-
-This assignment will deal with tuning the hyperparameters for the [online shopping dataset](https://archive.ics.uci.edu/dataset/468/online+shoppers+purchasing+intention+dataset). Make sure to remove the instructions and only keep Q6 onward. The qmd file of this assignment is located in the [files folder](https://georgetown.instructure.com/files/11681026/download?download_frd=1).
-
-- This is a group assignment with independent submission on Canvas. Collaboration is essential. Use Git for version control.
-- Begin by setting your random seed as the last four digits of your GUID.
-- Prefix each variable with 'g#groupnumber' (e.g., g01_variableName) to ensure uniqueness and to demonstrate originality in your group's work.
-- add the names of all group members to the YAML header above.
-- Use of Generative AI tools, including but not restricted to GPT-3 is strictly prohibited.
-
-## Git Commit and Collaboration
-
-- This is a group assignment. Collaboration is essential. Use Git for version control.
-- Regular and meaningful commit messages are expected, indicating steady progress and contributions from all group members.
-- Avoid large, infrequent commits. Instead, aim for more minor, frequent updates showing your code's evolution and thoughts.
-- Collaboration tools, especially Git, should be used as a backup tool and a truly collaborative platform. Discuss, review, and merge each other's contributions.
+# Instructions (removed)
 
 # Grading Criteria
 
